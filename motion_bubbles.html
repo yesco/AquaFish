@@ -10,18 +10,12 @@
         width:100%;
         height:100%;
     }
-    #toggle {
-        position: fixed;
-        right: 0;
-        bottom: 0;
-    }
     </style>
 
 </head>
 <body>
 	<video autoplay id="vid"></video>
 <canvas id="canvas" width="640" height="480"></canvas><br>
-<button onclick="toggleColours()" id="toggle">Toggle Colours</button>
 
 <script type="text/javascript">
     var video = document.querySelector("#vid");
@@ -85,16 +79,11 @@
 
         var diff = Math.abs(pr-cr) + Math.abs(pg-cg) + Math.abs(pb-cb);
 
-        var obj = new Object();
-        obj.d = diff;
+        var obj = { d: diff };
         if (diff > threshold) {
-            obj.r = cr;
-            obj.g = cg;
-            obj.b = cb;
+            return { d: diff, r: cr, g: cg, b: cb };
         } else {
-            obj.r = 555;
-            obj.g = 555;
-            obj.b = 555;
+            return { d: diff, r: 555, g: 555, b: 555 };
         }
 
         return obj;
@@ -105,12 +94,12 @@
         
         ctx.clearRect(0,0,canvas.width, canvas.height);
 
-    if(!firstRun) {
-        var x, y;
-        for(x = 0; x < canvas.width; x += size) {
-            for(y = 0; y < canvas.height; y += size) {
+      if(!firstRun) {
+
+        // scan the grid
+        for(var x = 0; x < canvas.width; x += size) {
+            for(var y = 0; y < canvas.height; y += size) {
                var cob = getPixel2(imageData, prevImageData, x, y);
-               //console.log(cob.g);
 
                if (cob.d > threshold) {
                    var b = new Ball(0);
@@ -124,7 +113,7 @@
                }
            }
         }
-        }
+      }
         // update previous frame image data
         prevImageData = imageData;
         firstRun = false;
