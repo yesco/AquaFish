@@ -61,10 +61,6 @@
         if (this.life <= 0) bubbles.splice(id,1)
     }
 
-    var onCameraFail = function (e) {
-        console.log('Camera did not work.', e);
-    };
-
     function getPixel2(imageData, prevImageData, x, y) {
         var cr, cg, cb, ca, pr, pg, pb, pa, offset = x * 4 + y * 4 * imageData.width;
 
@@ -167,7 +163,9 @@
     navigator.getUserMedia({video:true}, function (stream) {
         video.src = window.URL.createObjectURL(stream);
         localMediaStream = stream;
-    }, onCameraFail);
+    }, function cameraFail(e) {
+        console.log('Camera did not work.', e);
+    });
 
 </script>
 </body>
