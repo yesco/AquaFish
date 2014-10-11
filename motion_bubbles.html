@@ -1,9 +1,8 @@
 <!doctype html>
 <!-- http://webcamtest.davidhunterdesign.com/motion_bubbles.html -->
 <head>
-	<title>Motion Bubbles</title>
-
-	<style>
+<title>Motion Bubbles</title>
+<style>
     #vid {
         display:none;
     }
@@ -24,134 +23,101 @@
 <canvas id="canvas" width="640" height="480"></canvas><br>
 <button onclick="toggleColours()" id="toggle">Toggle Colours</button>
 
-
 <script type="text/javascript">
-
     var video = document.querySelector("#vid");
     var canvas = document.querySelector('#canvas');
     var ctx = canvas.getContext('2d');
     var localMediaStream = null;
-    //
+
     var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     var prevImageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-    //
-    var threshold = 100;
-    //
-    var size = 8;
+
+    // modify this to set grid size of detection
+    var size = 30;
+ 
+    var threshold = 200;
+
+    // essentially draw a circle using ctx.arc
     var startPoint = (Math.PI/180)*0;
     var endPoint = (Math.PI/180)*360;
-    //
-    var colourToggle = true;
-    //
+
     var bubbles = new Array();
-    //
     var firstRun = true;
 
     // BALL CLASS
     function Ball(n) {
         this.id = n;
-        this.x = 0;//Math.random()*canvas.width;
-        this.y = 0;//Math.random()*canvas.height;
+        this.x = 0;
+        this.y = 0;
         this.life = 20;
         this.r = 0;
         this.g = 0;
         this.b = 0;
-        //alert("ball created");
-        //console.log("ball created");
     }
 
-    Ball.prototype.updatePosition = function(id) {
-        //
-        this.x += Math.random()*this.life - (this.life/2);
-        this.y -= 3;
-        //
+    Ball.prototype.update = function(id) {
         this.life-= 0.3;
-        if(this.life <= 0) {
-            //this.life = 0;
-            bubbles.splice(id,1)
-        }
+        // remove if life expired
+        if (this.life <= 0) bubbles.splice(id,1)
     }
 
-    //
     var onCameraFail = function (e) {
         console.log('Camera did not work.', e);
     };
 
-    function toggleColours() {
-        colourToggle = !colourToggle;
-    }
-
     function getPixel2(imageData, prevImageData, x, y) {
-        //
         var cr, cg, cb, ca, pr, pg, pb, pa, offset = x * 4 + y * 4 * imageData.width;
+
         cr = imageData.data[offset];
         cg = imageData.data[offset + 1];
         cb = imageData.data[offset + 2];
         ca = imageData.data[offset + 3];
-        //
+
         pr = prevImageData.data[offset];
         pg = prevImageData.data[offset + 1];
         pb = prevImageData.data[offset + 2];
         pa = prevImageData.data[offset + 3];
-        //
+
         var diff = Math.abs(pr-cr) + Math.abs(pg-cg) + Math.abs(pb-cb);
+
         var obj = new Object();
-        if(diff > threshold) {
+        obj.d = diff;
+        if (diff > threshold) {
             obj.r = cr;
             obj.g = cg;
-             obj.b = cb;
+            obj.b = cb;
         } else {
             obj.r = 555;
             obj.g = 555;
             obj.b = 555;
         }
-        obj.d = diff;
-        //
+
         return obj;
     }
 
     function motionDetect() {
-        //
         imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        //
         
-        //
         ctx.clearRect(0,0,canvas.width, canvas.height);
-        //
-        if(!firstRun) {
-        //
+
+    if(!firstRun) {
         var x, y;
         for(x = 0; x < canvas.width; x += size) {
             for(y = 0; y < canvas.height; y += size) {
-                //
                var cob = getPixel2(imageData, prevImageData, x, y);
                //console.log(cob.g);
-               if(colourToggle) {
-                    //if(cob.g < 555) {
-                    if(cob.d > threshold) {
-                        //
-                        var b = new Ball(0);
-                        b.x = x;
-                        b.y = y;
-                        b.r = cob.r;
-                        b.g = cob.g;
-                        b.b = cob.b;
-                        b.life = cob.d/40;
-                        bubbles.push(b);
-                    }
-                } else {
-                    if(cob.d > threshold) {
-                        var b = new Ball(0);
-                        b.x = x;
-                        b.y = y;
-                        b.r = x/2;
-                        b.g = y/2;
-                        b.b = 153;
-                        b.life = cob.d/40;
-                        bubbles.push(b);
-                    }
-                }
-            }
+
+               if (cob.d > threshold) {
+                   var b = new Ball(0);
+                   b.x = x;
+                   b.y = y;
+                   b.r = 255; // x/2;
+                   //b.g = y/2;
+                   //b.b = 153;
+                   b.life = cob.d/40;
+                   bubbles.push(b);
+               }
+           }
         }
         }
         // update previous frame image data
@@ -159,45 +125,42 @@
         firstRun = false;
     }
 
+    // draw bubbles
     function render() {
-        //for(var i=bubbles.length-1; i>=0; i--) {
         for(var i=0; i<bubbles.length; i++) {
             var b = bubbles[i];
+
             ctx.fillStyle = "rgba(" + b.r + "," + b.g + "," + b.b + "," + 255 + ")";
             ctx.beginPath();
             ctx.arc(b.x,b.y,b.life, startPoint, endPoint, true);
             ctx.fill();
             ctx.closePath();
-            //
-            b.updatePosition(i);
+
+            b.update(i);
         }
     }
 
+   function draw(obj, context) {
+     context.drawImage(obj, 0, 0);
+     motionDetect();
+     render();
+   }
+   
+   // use timer, uses constant CPU
    function drawVideoAtCanvas(obj, context) {
         window.setInterval(function() { 
-            // draw video image to canvas
-            context.drawImage(obj, 0, 0);
-            motionDetect();
-            render();
-            //
+            draw(obj, context);
         }, 60);
-        //
-        
     }
 
+    // automatic, called as often as possible
     function update(obj, context) {
-        //
-        context.drawImage(obj, 0, 0);
-        motionDetect();
-        render();
-        //
+        draw(obj, context);
         requestAnimationFrame( function() { update(video,ctx) } );
     }
 
-
     //video.addEventListener('play', function() { drawVideoAtCanvas(video, ctx) }, false);
     video.addEventListener('play', function() { update(video, ctx) }, false);
-
 
     navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
     window.URL = window.URL || window.webkitURL;

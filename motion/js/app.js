@@ -153,7 +153,7 @@
 	differenceAccuracy(blendedData.data, sourceData.data, lastImageData.data);
 
 	// draw the result in a canvas
-	//contextBlended.putImageData(blendedData, 0, 0);
+	contextBlended.putImageData(blendedData, 0, 0);
 
 	// store the current webcam image
 	lastImageData = sourceData;
