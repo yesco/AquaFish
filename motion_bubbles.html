@@ -27,7 +27,8 @@
     var prevImageData = ctx.getImageData(0,0,canvas.width,canvas.height);
 
     // modify this to set grid size of detection
-    var size = 20;
+    var size = 10;
+    var gridSize = 50;
  
     // amount of "motion" to detect to trigger
     var threshold = 200;
@@ -119,6 +120,10 @@
             if (!grid[x]) grid[x] = new Array();
             for(var y = 0; y < canvas.height; y += size) {
                var cob = getPixel2(imageData, prevImageData, x, y);
+
+               var xx = Math.floor(x/gridSize)*gridSize;
+               var yy = Math.floor(y/gridSize)*gridSize;
+               var b = grid[xx][yy];
 
                if (cob.d > threshold) {
                    var b = new Ball(0);
