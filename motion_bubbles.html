@@ -109,9 +109,10 @@
     function motionDetect() {
         imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         
-        ctx.clearRect(0,0,canvas.width, canvas.height);
+      // this removes camera image
+      // ctx.clearRect(0,0,canvas.width, canvas.height);
 
-      if(!firstRun) {
+       if(!firstRun) {
 
         // scan the grid
         for(var x = 0; x < canvas.width; x += size) {
@@ -129,6 +130,7 @@
                    //b.g = y/2;
                    //b.b = 153;
 
+                   // assign unique random color to each so we can track individuals
                    b.r = Math.floor(Math.random()*256);
                    b.g = Math.floor(Math.random()*256);
                    b.b = Math.floor(Math.random()*256);
