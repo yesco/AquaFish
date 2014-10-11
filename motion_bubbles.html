@@ -48,13 +48,26 @@
     }
 
     Ball.prototype.update = function(id) {
-        this.life-= 0.3;
+        this.life -= 0.3;
         // remove if life expired
         if (this.life <= 0) this.remove(id);
     }
 
     Ball.prototype.remove = function(id) {
-       bubbles.splice(id, 1)
+       if (typeof id !== 'number') {
+         for(var i=0; i<bubbles.length; i++) {
+            if (bubbles[i] == this) {
+              if (!this.r) {
+                this.r = 255;
+                this.life = 1;
+              }
+              id = i;
+              break;
+            }
+         }
+       }
+       if (typeof id === 'number') bubbles.splice(id, 1)
+
        grid[this.x][this.y] = undefined;
     }
 
@@ -65,7 +78,7 @@
     Ball.prototype.draw = function(ctx) {
         ctx.fillStyle = "rgba(" + this.r + "," + this.g + "," + this.b + "," + 255 + ")";
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.life, startPoint, endPoint, true);
+        ctx.arc(this.xx || this.x, this.yy || this.y, this.life, startPoint, endPoint, true);
         ctx.fill();
         ctx.closePath();
     }
@@ -112,7 +125,8 @@
                    var b = new Ball(0);
                    b.x = x;
                    b.y = y;
-                   b.r = 255; // x/2;
+                   b.b = 255;
+                   //b.r = x/2;
                    //b.g = y/2;
                    //b.b = 153;
                    b.life = cob.d/40;
@@ -130,14 +144,42 @@
     function merge() {
         for(var i=0; i<bubbles.length; i++) {
             var b = bubbles[i];
+            if (!b.b) continue;
+
+            // get neighbours
             var up = grid[b.x][b.y-size];
             var down = grid[b.x][b.y+size];
             var l = grid[b.x-size];
             var left = l ? l[b.y] : undefined;
             var r = grid[b.x+size];
             var right = r ? r[b.y] : undefined;
-            //console.log(b, (up?'up':'') + (down?'down':'') + (left?'left':'') + (right?'right':''));
-        }
+
+            // only live/new
+            up = (up && up.b) && up;
+            down = (down && down.b) && down;
+            left = (left && left.b) && left;
+            right = (right && right.b) && right;
+
+            var status = 0 + (up?'up':' ') + (down?'down':' ') + (left?'left':' ') + (right?'right':' ');
+
+            var life = (up && up.life || 0) + (down && down.life || 0) + (left && left.life || 0) + (right && right.life || 0);
+
+            up && up.remove();
+            down && down.remove();
+            left && left.remove();
+            right && right.remove();
+
+            if (!b.xx) b.xx = b.x;
+            if (!b.yy) b.yy = b.y;
+
+            if (up) b.yy -= size/up.life;
+            if (down) b.yy += size/down.life;
+            if (left) b.xx -= size/left.life;
+            if (right) b.xx += size/right.life;
+            
+            b.life += life;
+            if (b.life > 30) b.life = 30;
+          }
     }
 
     // draw bubbles
