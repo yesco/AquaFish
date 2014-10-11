@@ -139,16 +139,22 @@
     function blend() {
 	var width = canvasSource.width;
 	var height = canvasSource.height;
+
 	// get webcam image data
 	var sourceData = contextSource.getImageData(0, 0, width, height);
+
 	// create an image if the previous image doesn’t exist
 	if (!lastImageData) lastImageData = contextSource.getImageData(0, 0, width, height);
+
 	// create a ImageData instance to receive the blended result
 	var blendedData = contextSource.createImageData(width, height);
+
 	// blend the 2 images
 	differenceAccuracy(blendedData.data, sourceData.data, lastImageData.data);
+
 	// draw the result in a canvas
-	contextBlended.putImageData(blendedData, 0, 0);
+	//contextBlended.putImageData(blendedData, 0, 0);
+
 	// store the current webcam image
 	lastImageData = sourceData;
     }
