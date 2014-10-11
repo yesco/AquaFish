@@ -121,29 +121,30 @@
             for(var y = 0; y < canvas.height; y += size) {
                var cob = getPixel2(imageData, prevImageData, x, y);
 
-               var xx = Math.floor(x/gridSize)*gridSize;
-               var yy = Math.floor(y/gridSize)*gridSize;
-               var b = grid[xx][yy];
-
                if (cob.d > threshold) {
-                   var b = new Ball(0);
-                   b.x = x;
-                   b.y = y;
+                   var xx = Math.floor(x/gridSize)*gridSize;
+                   var yy = Math.floor(y/gridSize)*gridSize;
+                   var b = grid[xx][yy];
 
-                   //b.b = 255;
-                   //b.r = x/2;
-                   //b.g = y/2;
-                   //b.b = 153;
+                   if (!b) {
+                     b = new Ball(0);
+                     b.x = xx;
+                     b.y = yy;
+                     //b.b = 255;
+                     //b.r = x/2;
+                     //b.g = y/2;
+                     //b.b = 153;
+                     // assign unique random color to each so we can track individuals
+                     b.r = Math.floor(Math.random()*256);
+                     b.g = Math.floor(Math.random()*256);
+                     b.b = Math.floor(Math.random()*256);
+                     b.life = cob.d/40;
 
-                   // assign unique random color to each so we can track individuals
-                   b.r = Math.floor(Math.random()*256);
-                   b.g = Math.floor(Math.random()*256);
-                   b.b = Math.floor(Math.random()*256);
-
-                   b.life = cob.d/40;
-
-                   bubbles.push(b);
-                   grid[x][y] = b;
+                     bubbles.push(b);
+                     grid[xx][yy] = b;
+                  } else {
+                     b.life += cob.d/40;
+                  }
                }
            }
         }
@@ -158,11 +159,12 @@
             var b = bubbles[i];
 
             // get neighbours
-            var up = grid[b.x][b.y-size];
-            var down = grid[b.x][b.y+size];
-            var l = grid[b.x-size];
+
+            var up = grid[b.x][b.y-gridSize];
+            var down = grid[b.x][b.y+gridSize];
+            var l = grid[b.x-gridSize];
             var left = l ? l[b.y] : undefined;
-            var r = grid[b.x+size];
+            var r = grid[b.x+gridSize];
             var right = r ? r[b.y] : undefined;
 
             var status = 0 + (up?'up':' ') + (down?'down':' ') + (left?'left':' ') + (right?'right':' ');
@@ -174,15 +176,15 @@
             left && left.remove();
             right && right.remove();
 
-            var mult = size*0.1;
+            var mult = gridSize/40; // initial life? scaling
             var x = b.x, y = b.y;
             if (up) y -= mult * up.life;
             if (down) y += mult * down.life;
             if (left) x -= mult * left.life;
             if (right) x += mult * right.life;
 
-            x = Math.floor(x / size) * size;
-            y = Math.floor(y / size) * size;
+            x = Math.floor(x/gridSize)*gridSize;
+            y = Math.floor(y/gridSize)*gridSize;
 
            //if (false)
             if (x !== b.x || y != b.y) {
