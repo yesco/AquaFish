@@ -155,52 +155,53 @@
     }
 
     function merge() {
+        var removes = [];
         for(var i=0; i<bubbles.length; i++) {
             var b = bubbles[i];
+            b.dest = false;
+            if (!b) continue;
+            var x = b.x, y = b.y, life = b.life;
 
-            // get neighbours
+            for(var dy=-1; dy < 2; dy++) {
+              for(var dx=-1; dx < 2; dx++) {
+                if (!dx && !dy) continue;
+                var n = grid[b.x + gridSize*dy] || [];
+                var nn = n[b.y + gridSize*dy];
+                if (!nn) continue;
 
-            var up = grid[b.x][b.y-gridSize];
-            var down = grid[b.x][b.y+gridSize];
-            var l = grid[b.x-gridSize];
-            var left = l ? l[b.y] : undefined;
-            var r = grid[b.x+gridSize];
-            var right = r ? r[b.y] : undefined;
+                if (nn.life > b.life) continue; // merge into nn instead
 
-            var status = 0 + (up?'up':' ') + (down?'down':' ') + (left?'left':' ') + (right?'right':' ');
-
-            var life = (up && up.life || 0) + (down && down.life || 0) + (left && left.life || 0) + (right && right.life || 0);
-
-            up && up.remove();
-            down && down.remove();
-            left && left.remove();
-            right && right.remove();
-
-            var mult = gridSize/40; // initial life? scaling
-            var x = b.x, y = b.y;
-            if (up) y -= mult * up.life;
-            if (down) y += mult * down.life;
-            if (left) x -= mult * left.life;
-            if (right) x += mult * right.life;
-
-            x = Math.floor(x/gridSize)*gridSize;
-            y = Math.floor(y/gridSize)*gridSize;
-
-           //if (false)
-            if (x !== b.x || y != b.y) {
-              // remove
-              grid[b.x][b.y] = undefined; 
-              console.log("MOVE:", b.x, b.y, x, y);
-              // if not outside screen
-              if (grid[x]) {
-                b.x = x; b.y = y;
-                grid[b.x][b.y] = b;
+                // merge
+                x += gridSize*dx/2*nn.life/40;
+                y += gridSize*dy/2*nn.life/40;
+                life += nn.life;
+ 
+                removes.push(nn);
+                b.dest = true;
               }
             }
 
-            b.life += life;
+            x = Math.floor(x/gridSize)*gridSize;
+            y = Math.floor(y/gridSize)*gridSize;
+            if (x != b.x || y != b.y) {
+              if (grid[x]) {
+                var bb = grid[x][y];
+                if (bb) removes.push(bb);
+                b.x = x;
+                b.y = y;
+                grid[x][y] = b;
+              }
+            }
+
+            b.life = life;
             if (b.life > 30) b.life = 30;
+
+            continue;
           }
+
+          var had = bubbles.length;
+          removes.forEach(function(b){ if (!b.dest) b.remove(); });
+          console.log("STILL", had, bubbles.length, removes.length);
     }
 
     // draw bubbles
