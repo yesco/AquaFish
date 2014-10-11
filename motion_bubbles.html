@@ -27,12 +27,13 @@
     var prevImageData = ctx.getImageData(0,0,canvas.width,canvas.height);
 
     // modify this to set grid size of detection
-    var size = 30;
+    var size = 20;
  
     // amount of "motion" to detect to trigger
     var threshold = 200;
 
     var bubbles = new Array();
+    var grid = new Array();
     var firstRun = true;
 
     // BALL CLASS
@@ -49,7 +50,12 @@
     Ball.prototype.update = function(id) {
         this.life-= 0.3;
         // remove if life expired
-        if (this.life <= 0) bubbles.splice(id,1)
+        if (this.life <= 0) this.remove(id);
+    }
+
+    Ball.prototype.remove = function(id) {
+       bubbles.splice(id, 1)
+       grid[this.x][this.y] = undefined;
     }
 
     // essentially draw a circle using ctx.arc
@@ -98,6 +104,7 @@
 
         // scan the grid
         for(var x = 0; x < canvas.width; x += size) {
+            if (!grid[x]) grid[x] = new Array();
             for(var y = 0; y < canvas.height; y += size) {
                var cob = getPixel2(imageData, prevImageData, x, y);
 
@@ -110,6 +117,7 @@
                    //b.b = 153;
                    b.life = cob.d/40;
                    bubbles.push(b);
+                   grid[x][y] = b;
                }
            }
         }
@@ -117,6 +125,19 @@
         // update previous frame image data
         prevImageData = imageData;
         firstRun = false;
+    }
+
+    function merge() {
+        for(var i=0; i<bubbles.length; i++) {
+            var b = bubbles[i];
+            var up = grid[b.x][b.y-size];
+            var down = grid[b.x][b.y+size];
+            var l = grid[b.x-size];
+            var left = l ? l[b.y] : undefined;
+            var r = grid[b.x+size];
+            var right = r ? r[b.y] : undefined;
+            //console.log(b, (up?'up':'') + (down?'down':'') + (left?'left':'') + (right?'right':''));
+        }
     }
 
     // draw bubbles
@@ -131,6 +152,7 @@
    function draw(obj, context) {
      context.drawImage(obj, 0, 0);
      motionDetect();
+     merge();
      render();
    }
    
