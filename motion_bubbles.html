@@ -41,7 +41,7 @@
         this.id = n;
         this.x = 0;
         this.y = 0;
-        this.life = 20;
+        this.life = 10;
         this.r = 0;
         this.g = 0;
         this.b = 0;
@@ -57,16 +57,14 @@
        if (typeof id !== 'number') {
          for(var i=0; i<bubbles.length; i++) {
             if (bubbles[i] == this) {
-              if (!this.r) {
-                this.r = 255;
-                this.life = 1;
-              }
               id = i;
               break;
             }
          }
        }
-       if (typeof id === 'number') bubbles.splice(id, 1)
+       if (typeof id === 'number') {
+          bubbles.splice(id, 1)
+       }
 
        grid[this.x][this.y] = undefined;
     }
@@ -125,11 +123,18 @@
                    var b = new Ball(0);
                    b.x = x;
                    b.y = y;
-                   b.b = 255;
+
+                   //b.b = 255;
                    //b.r = x/2;
                    //b.g = y/2;
                    //b.b = 153;
+
+                   b.r = Math.floor(Math.random()*256);
+                   b.g = Math.floor(Math.random()*256);
+                   b.b = Math.floor(Math.random()*256);
+
                    b.life = cob.d/40;
+
                    bubbles.push(b);
                    grid[x][y] = b;
                }
@@ -144,7 +149,6 @@
     function merge() {
         for(var i=0; i<bubbles.length; i++) {
             var b = bubbles[i];
-            if (!b.b) continue;
 
             // get neighbours
             var up = grid[b.x][b.y-size];
@@ -153,12 +157,6 @@
             var left = l ? l[b.y] : undefined;
             var r = grid[b.x+size];
             var right = r ? r[b.y] : undefined;
-
-            // only live/new
-            up = (up && up.b) && up;
-            down = (down && down.b) && down;
-            left = (left && left.b) && left;
-            right = (right && right.b) && right;
 
             var status = 0 + (up?'up':' ') + (down?'down':' ') + (left?'left':' ') + (right?'right':' ');
 
@@ -169,14 +167,28 @@
             left && left.remove();
             right && right.remove();
 
-            if (!b.xx) b.xx = b.x;
-            if (!b.yy) b.yy = b.y;
+            var mult = size*0.1;
+            var x = b.x, y = b.y;
+            if (up) y -= mult * up.life;
+            if (down) y += mult * down.life;
+            if (left) x -= mult * left.life;
+            if (right) x += mult * right.life;
 
-            if (up) b.yy -= size/up.life;
-            if (down) b.yy += size/down.life;
-            if (left) b.xx -= size/left.life;
-            if (right) b.xx += size/right.life;
-            
+            x = Math.floor(x / size) * size;
+            y = Math.floor(y / size) * size;
+
+           //if (false)
+            if (x !== b.x || y != b.y) {
+              // remove
+              grid[b.x][b.y] = undefined; 
+              console.log("MOVE:", b.x, b.y, x, y);
+              // if not outside screen
+              if (grid[x]) {
+                b.x = x; b.y = y;
+                grid[b.x][b.y] = b;
+              }
+            }
+
             b.life += life;
             if (b.life > 30) b.life = 30;
           }
