@@ -35,11 +35,8 @@
     // modify this to set grid size of detection
     var size = 30;
  
+    // amount of "motion" to detect to trigger
     var threshold = 200;
-
-    // essentially draw a circle using ctx.arc
-    var startPoint = (Math.PI/180)*0;
-    var endPoint = (Math.PI/180)*360;
 
     var bubbles = new Array();
     var firstRun = true;
@@ -59,6 +56,18 @@
         this.life-= 0.3;
         // remove if life expired
         if (this.life <= 0) bubbles.splice(id,1)
+    }
+
+    // essentially draw a circle using ctx.arc
+    var startPoint = (Math.PI/180)*0;
+    var endPoint = (Math.PI/180)*360;
+
+    Ball.prototype.draw = function(ctx) {
+        ctx.fillStyle = "rgba(" + this.r + "," + this.g + "," + this.b + "," + 255 + ")";
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.life, startPoint, endPoint, true);
+        ctx.fill();
+        ctx.closePath();
     }
 
     function getPixel2(imageData, prevImageData, x, y) {
@@ -125,13 +134,7 @@
     function render() {
         for(var i=0; i<bubbles.length; i++) {
             var b = bubbles[i];
-
-            ctx.fillStyle = "rgba(" + b.r + "," + b.g + "," + b.b + "," + 255 + ")";
-            ctx.beginPath();
-            ctx.arc(b.x,b.y,b.life, startPoint, endPoint, true);
-            ctx.fill();
-            ctx.closePath();
-
+            b.draw(ctx);
             b.update(i);
         }
     }
@@ -160,6 +163,7 @@
 
     navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
     window.URL = window.URL || window.webkitURL;
+
     navigator.getUserMedia({video:true}, function (stream) {
         video.src = window.URL.createObjectURL(stream);
         localMediaStream = stream;
