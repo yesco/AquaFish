@@ -23,8 +23,6 @@
 
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 
-<script src='js/x3dom.js'></script>
-
 <script src="js/compatibility.js"></script>
 <script src="js/smoother.js"></script>
 	
@@ -36,42 +34,41 @@
 	
 <script>
 $(window).load(function() {
-    
-    
+
     function randGen() {
         return Math.floor(Math.random() * 101) - 50;
     }
 
-    function movement(object, destination) {
-        console.log("crap", parseInt(object.css("left"))-destination.x);
-        object.animate({left:destination.x, top:destination.y}, 500, "linear")
+    function movement(fish, destination) {
+        console.log("movement", destination); //parseInt(fish.css("left"))-destination.x);
+        fish.animate({left: destination.x, top: destination.y}, 500, "linear")
     }
 
     var destination = {
         x: 100,
         y: 200,
-    };
+    }
+
     function randomFish() {
-        var $test = $("#test");
+        var fish = $("#test");
         for(var i=1; i<100; i++) {
             var originalx = destination.x;
             destination.x += randGen();
             destination.y += randGen();
 
-            if(originalx - destination.x>0) {
-                console.log(object.css("left"));
-                $test.css("background-image", "url(/images/bigblue-right.gif)");
+            if (originalx - destination.x>0) {
+                console.log(fish.css("left"));
+                fish.css("background-image", "url(/images/bigblue-right.gif)");
                 console.log("fish2");
-            }
-            else{
+            } else {
+                fish.css("background-image", "url(/images/bigblue-left.gif)");
                 console.log("fish1");
-                $test.css("background-image", "url(/images/bigblue-left.gif)");
             }
 
-            console.log(destination.x);
-            movement($test, destination)
+            console.log(destination);
+            movement(fish, destination)
         }
-    };
+    }
 
     window.randomFish = randomFish; 
     var smoother = new Smoother([0.9995, 0.9995], [0, 0], 0);
@@ -100,6 +97,7 @@ $(window).load(function() {
     var fishes = [];
 
     function releaseFish(fish) {
+        movement($("#test"), fish);
         fishes.push(fish);
     }
 
@@ -226,7 +224,7 @@ $(window).load(function() {
 <h1 style='text-align:center;font-size:60px;color:red;'>Aquarium</h1>
 <div id="test"></div>
 <script type="text/javascript">
-randomFish();
+//setTimeout(function(){ randomFish(); }, 1000);
 </script>  
 </body>
 </html>
