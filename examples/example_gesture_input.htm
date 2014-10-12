@@ -38,7 +38,7 @@ $(window).load(function() {
 
     function move(fish, destination) {
        console.log("move", destination);
-       fish.animate({left: destination.x, top: destination.y}, 500, "linear")
+       fish.animate({left: destination.xx || destination.x, top: destination.yy || destination.y}, 500, "linear")
     }
 
     var destination = {
@@ -46,6 +46,8 @@ $(window).load(function() {
         y: 200,
     }
 
+ 
+    // TODO: make fish move randomly after released, every random few s?
     function randomFish() {
         var fish = $("#test");
         for(var i=1; i<100; i++) {
@@ -70,6 +72,8 @@ $(window).load(function() {
     var canvas = $('<canvas style="position: fixed; z-index: 1; top: 10px; left: 10px; opacity: 0.9">').get(0);
     var context = canvas.getContext('2d');
     var video = document.createElement('video');
+
+    document.getElementsByTagName('body')[0].appendChild(canvas);
 
     canvas.onclick = function(e) {
       var fish = $("#test");
@@ -97,11 +101,6 @@ $(window).load(function() {
 
     var fishes = [];
 
-    function releaseFish(fish) {
-        move($("#test"), fish);
-        fishes.push(fish);
-    }
-
     function drawAll() {
         fishes = fishes.filter(function(fish){
           draw(fish);
@@ -110,8 +109,6 @@ $(window).load(function() {
         });
     }
 
-    document.getElementsByTagName('body')[0].appendChild(canvas);
-    
     try {
 	compatibility.getUserMedia({video: true}, function(stream) {
 	    try {
@@ -133,12 +130,9 @@ $(window).load(function() {
 	compatibility.requestAnimationFrame(play);
 	if (video.paused) video.play();
 	
-        /* Draw video overlay */
+        // Draw video overlay
 	canvas.height = screen.height-100;
 	canvas.width = ~~(canvas.height * video.videoWidth / video.videoHeight);
-
-        //canvas.heigth = screen.heigth;
-        //canvas.width = screen.width;
 
         // mirror video
         context.translate(canvas.clientWidth, 0);
@@ -165,14 +159,18 @@ $(window).load(function() {
 		fist_pos_old = fist_pos;
 		angle = smoother.smooth(angle);
 				      
-                // no hand
+                // no hand - drop the fish!
                 if (!coords[0]) {
                     var ms = Date.now();
                     var dms = ms - POS.ms;
                     if (dms > 500) {
                         // change last one color and size
                         POS.life = 100;
-                        POS.c = "rgba(255,255,255,255)";
+                        POS.c = "rgba(255,255,255,255)"; // white
+                        move($("#test"), POS);
+
+                        // delay the creation of another fish, this stops persistent "flickering"
+                        POS.ms = ms; 
                     }
 		}
 		
@@ -185,6 +183,10 @@ $(window).load(function() {
                     LAST = POS;
                     POS = {x: x, y: y, ms: ms}
 
+                    // adjust for the mirror, bad hack, xx yy
+                    POS.xx = canvas.clientWidth - POS.x - $("#test").width()/2;
+                    POS.yy = POS.y - $("#test").height()/2;
+
                     var dist = Math.abs(POS.x - LAST.x) + Math.abs(POS.y - LAST.y);
 		    var dms = POS.ms - LAST.ms;
 
@@ -195,7 +197,7 @@ $(window).load(function() {
                     }
 
                     if (dist < 100 || dms == 0) {
-                        releaseFish(POS);
+                        fishes.push(POS);
                     } else {
                         POS = PREV;
                     }
