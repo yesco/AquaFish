@@ -2,17 +2,13 @@
 
 Using your webcam release fishes that then swim randomly around.
 
-**BUT:** it doesn't work, yet...
+**BUT:** well, it almost works...
 
 ## What's going on?
 
-Haha.
+The black dot is trail of your fist. White dot is where you stop and open your hand. The fish moves there now. There is only one fish. Also, click anywhere and the fish will move there.
 
-Yes it doesn't work yet. We only had 1h to integrate our codes. The black dot is trail of your fist. White is where you stop and open your hand. But it isn't reliable. Optial recognition libraries aren't super good and reliable.
-
-Currently, there is one fish that get moved to the white dot but it's off picture grid and it's transparently behind.
-
-So well.... it's not finished.
+But it isn't reliable. Optical recognition libraries aren't super good and reliable. So well.... it's not finished.
 
 ## Install and preparation
 - install ```git```
