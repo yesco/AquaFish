@@ -17,13 +17,38 @@
 	<script src="../js/jquery.objectdetect.js"></script>
 	
 	<script>
+        var POS = {x: 0, y: 0, ms: 0};
 	$(window).load(function() {
 	
 		var smoother = new Smoother([0.9995, 0.9995], [0, 0], 0),
 			canvas = $('<canvas style="position: fixed; z-index: 1001; top: 10px; right: 10px; opacity: 0.9">').get(0),
 			context = canvas.getContext('2d'),
 			video = document.createElement('video');
-	
+
+                function draw(x, y, r, c) {
+                   r = r || 10;
+                   c = c || "rgba(" + 0 + "," + 0 + "," + 0 + "," + 255 + ")";
+
+                   // essentially draw a circle using ctx.arc
+                   var startPoint = (Math.PI/180)*0;
+                   var endPoint = (Math.PI/180)*360;
+                   context.fillStyle = c;
+                   context.beginPath();
+                   context.arc(x, y, r, startPoint, endPoint, true);
+                   context.fill();
+                   context.closePath();
+                }
+
+                var balls = [];
+
+                function ball(pos) {
+                   balls.push(pos);
+                }
+
+                function drawAll() {
+                  balls.forEach(function(b){ draw(b.x, b.y, b.r, b.c); });
+                }
+
 		document.getElementsByTagName('body')[0].appendChild(canvas);
 	
 		try {
@@ -47,20 +72,30 @@
 			compatibility.requestAnimationFrame(play);
 			if (video.paused) video.play();
 	        
-	        /* Draw video overlay */
-			canvas.width = ~~(100 * video.videoWidth / video.videoHeight);
-			canvas.height = 100;
+                        /* Draw video overlay */
+			canvas.height = screen.height-100;
+			canvas.width = ~~(canvas.height * video.videoWidth / video.videoHeight);
+
+                        //canvas.heigth = screen.heigth;
+                        //canvas.width = screen.width;
+
+                        // mirror video
+                        context.translate(canvas.clientWidth, 0);
+                        //context.translate(1000, 0);
+                        context.scale(-1, 1);
+
 			context.drawImage(video, 0, 0, canvas.clientWidth, canvas.clientHeight);
-			
+
 			if (video.readyState === video.HAVE_ENOUGH_DATA) {
-				$(video).objectdetect("all", {size: 300, scaleMin: 3, scaleFactor: 1.1, classifier: objectdetect.handfist}, function(coords) {
+				$(video).objectdetect("all", {size: 300, scaleMin: 3, scaleFactor: 1.1, classifier: objectdetect.handfist},
+	                            function(coords) {
 					var fist_pos = coords[0] ?
 						[coords[0][0] + coords[0][2] / 2,
 						 coords[0][1] + coords[0][3] / 2] : null;
 					
 					if (fist_pos && fist_pos_old) {
-						var dx = (fist_pos[0] - fist_pos_old[0]) / video.videoWidth,
-							dy = (fist_pos[1] - fist_pos_old[1]) / video.videoHeight;
+						var dx = (fist_pos[0] - fist_pos_old[0]) / video.videoWidth;
+						var dy = (fist_pos[1] - fist_pos_old[1]) / video.videoHeight;
 						
 						if (dx*dx + dy*dy < 0.2) {
 							angle[0] += 5.0 * dx;
@@ -73,7 +108,42 @@
 					document.getElementById('transform_a').setAttribute('rotation', '0 1 0 ' + angle[0]); 
 					document.getElementById('transform_b').setAttribute('rotation', '1 0 0 ' + angle[1]); 
 		
+                                        // no hand
+                                        if (!coords[0]) {
+                                           var ms = Date.now();
+                                           var dms = ms - POS.ms;
+                                           if (dms > 500) {
+                                             // change last one color and size
+                                             POS.r = 100;
+                                             POS.c = "rgba(255,255,255,255)";
+                                           }
+					}
+
 					if (coords[0]) {
+                                                var x = (coords[0][0]+coords[0][2]/2) / video.videoWidth * canvas.clientWidth;
+                                                var y = (coords[0][1]+coords[0][3]/2) / video.videoWidth * canvas.clientWidth;
+                                                var ms = Date.now();
+                                                PREV = POS;
+                                                LAST = POS;
+                                                POS = {x: x, y: y, ms: ms}
+
+                                                var dist = Math.abs(POS.x - LAST.x) + Math.abs(POS.y - LAST.y);
+			                        var dms = POS.ms - LAST.ms;
+
+                                                // filter out temp jumps
+                                                if (dms > 500 && dist > 100) {
+                                                   // allow new pos
+                                                   dms = 0;
+                                                }
+
+                                                if (dist < 100 || dms == 0) {
+                                                  console.log("XY", x, y);
+
+                                                  ball(POS);
+                                                } else {
+                                                  POS = PREV;
+                                                }
+
 						/* Draw coordinates on video overlay: */
 						context.beginPath();
 						context.lineWidth = '2';
@@ -85,6 +155,9 @@
 							coords[0][3] / video.videoHeight * canvas.clientHeight);
 						context.stroke();
 					}
+
+                                        drawAll();
+
 				});
 			}
 		}
