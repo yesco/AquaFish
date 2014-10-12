@@ -6,13 +6,14 @@
 
 <style type="text/css">
 #test {
-  position:relative; 
-  top:0px; 
-  background-image: url(/images/bigblue-right.gif);
-  background-repeat: no-repeat; 
-  display:block;
-  height:200px; 
-  width:200px;
+  position: absolute; 
+  top: 0px; 
+  //background-image: url(/images/bigblue-right.gif);
+  //background-repeat: no-repeat; 
+  display: block;
+  //height: 200px; 
+  //width: 200px;
+  z-index: 100;
 };
 </style>
 
@@ -70,11 +71,17 @@ $(window).load(function() {
         }
     }
 
-    window.randomFish = randomFish; 
     var smoother = new Smoother([0.9995, 0.9995], [0, 0], 0);
-    var canvas = $('<canvas style="position: fixed; z-index: 1001; top: 10px; right: 10px; opacity: 0.9">').get(0);
+    var canvas = $('<canvas style="position: fixed; z-index: 1; top: 10px; left: 10px; opacity: 0.9">').get(0);
     var context = canvas.getContext('2d');
     var video = document.createElement('video');
+
+    canvas.onclick = function(e) {
+      var fish = $("#test");
+      console.log("CLICK", e, fish);
+      var pos = {x: e.x - fish.width()/2, y: e.y - fish.height()/2};
+      movement(fish, pos);
+    };
 
     var startPoint = (Math.PI/180)*0;
     var endPoint = (Math.PI/180)*360;
@@ -221,10 +228,11 @@ $(window).load(function() {
 </head>
 
 <body>
-<h1 style='text-align:center;font-size:60px;color:red;'>Aquarium</h1>
-<div id="test"></div>
-<script type="text/javascript">
-//setTimeout(function(){ randomFish(); }, 1000);
-</script>  
+
+<img id="test" src="/images/bigblue-right.gif"/>
+
+<h1 style='text-align:center;font-size:60px;color:red;'>AquaFish</h1>
+
+
 </body>
 </html>
