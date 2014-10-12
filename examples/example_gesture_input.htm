@@ -37,7 +37,6 @@ $(window).load(function() {
     }
 
     function move(fish, destination) {
-       console.log("move", destination);
        fish.animate({left: destination.xx || destination.x, top: destination.yy || destination.y}, 500, "linear")
     }
 
