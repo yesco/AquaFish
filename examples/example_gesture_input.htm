@@ -40,8 +40,8 @@ $(window).load(function() {
     }
 
     function movement(fish, destination) {
-        console.log("movement", destination); //parseInt(fish.css("left"))-destination.x);
-        fish.animate({left: destination.x, top: destination.y}, 500, "linear")
+        console.log("movement", destination); //parseInt(fish.css("left"))-destination.x); 
+       fish.animate({left: destination.x, top: destination.y}, 500, "linear")
     }
 
     var destination = {
