@@ -1,14 +1,30 @@
 <!DOCTYPE html>
-<!-- based on http://mtschirs.github.io/js-objectdetect/examples/example_gesture_input.htm -->
+<!-- 3ased on http://mtschirs.github.io/js-objectdetect/examples/example_gesture_input.htm -->
 <!-- using https://github.com/mtschirs/js-objectdetect -->
 <html lang="en">
 <head>
+
+<style type="text/css">
+#test {
+  position:relative; 
+  top:0px; 
+  background-image: url(/images/bigblue-right.gif);
+  background-repeat: no-repeat; 
+  display:block;
+  height:200px; 
+  width:200px;
+};
+</style>
+
 <meta charset="utf-8">
 <title>Gesture Control Example</title>
 		
 <link rel='stylesheet' type='text/css' href='css/x3dom.css'></link>
+
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+
 <script src='js/x3dom.js'></script>
-    
+
 <script src="js/compatibility.js"></script>
 <script src="js/smoother.js"></script>
 	
@@ -21,6 +37,43 @@
 <script>
 $(window).load(function() {
     
+    
+    function randGen() {
+        return Math.floor(Math.random() * 101) - 50;
+    }
+
+    function movement(object, destination) {
+        console.log("crap", parseInt(object.css("left"))-destination.x);
+        object.animate({left:destination.x, top:destination.y}, 500, "linear")
+    }
+
+    var destination = {
+        x: 100,
+        y: 200,
+    };
+    function randomFish() {
+        var $test = $("#test");
+        for(var i=1; i<100; i++) {
+            var originalx = destination.x;
+            destination.x += randGen();
+            destination.y += randGen();
+
+            if(originalx - destination.x>0) {
+                console.log(object.css("left"));
+                $test.css("background-image", "url(/images/bigblue-right.gif)");
+                console.log("fish2");
+            }
+            else{
+                console.log("fish1");
+                $test.css("background-image", "url(/images/bigblue-left.gif)");
+            }
+
+            console.log(destination.x);
+            movement($test, destination)
+        }
+    };
+
+    window.randomFish = randomFish; 
     var smoother = new Smoother([0.9995, 0.9995], [0, 0], 0);
     var canvas = $('<canvas style="position: fixed; z-index: 1001; top: 10px; right: 10px; opacity: 0.9">').get(0);
     var context = canvas.getContext('2d');
@@ -171,6 +224,9 @@ $(window).load(function() {
 
 <body>
 <h1 style='text-align:center;font-size:60px;color:red;'>Aquarium</h1>
-  
+<div id="test"></div>
+<script type="text/javascript">
+randomFish();
+</script>  
 </body>
 </html>
