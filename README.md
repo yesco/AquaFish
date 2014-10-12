@@ -2,6 +2,18 @@
 
 Using your webcam release fishes that then swim randomly around.
 
+**BUT:** it doesn't work, yet...
+
+## What's going on?
+
+Haha.
+
+Yes it doesn't work yet. We only had 1h to integrate our codes. The black dot is trail of your fist. White is where you stop and open your hand. But it isn't reliable. Optial recognition libraries aren't super good and reliable.
+
+Currently, there is one fish that get moved to the white dot but it's off picture grid and it's transparently behind.
+
+So well.... it's not finished.
+
 ## Install and preparation
 - install ```git```
 - install ```nodejs```
