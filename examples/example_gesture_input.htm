@@ -29,14 +29,14 @@ $(window).load(function() {
     var startPoint = (Math.PI/180)*0;
     var endPoint = (Math.PI/180)*360;
 
-    function draw(b) {
-        b.life = b.life || 30;
-        b.c = b.c || "rgba(" + 0 + "," + 0 + "," + 0 + "," + 255 + ")";
+    function draw(fish) {
+        fish.life = fish.life || 30;
+        fish.c = fish.c || "rgba(" + 0 + "," + 0 + "," + 0 + "," + 255 + ")";
 
         // essentially draw a filled circle using ctx.arc
-        context.fillStyle = b.c;
+        context.fillStyle = fish.c;
         context.beginPath();
-        context.arc(b.x, b.y, b.life, startPoint, endPoint, true);
+        context.arc(fish.x, fish.y, fish.life, startPoint, endPoint, true);
         context.fill();
         context.closePath();
     }
@@ -51,10 +51,10 @@ $(window).load(function() {
     }
 
     function drawAll() {
-        fishes = fishes.filter(function(b){
-          draw(b);
-          b.life--
-          return b.life > 0; // true to keep, otherwise dead
+        fishes = fishes.filter(function(fish){
+          draw(fish);
+          fish.life--
+          return fish.life > 0; // true to keep, otherwise dead
         });
     }
 
