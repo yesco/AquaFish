@@ -28,13 +28,13 @@ $(window).load(function() {
     var endPoint = (Math.PI/180)*360;
 
     function draw(b) {
-        b.r = b.r || 30;
+        b.life = b.life || 30;
         b.c = b.c || "rgba(" + 0 + "," + 0 + "," + 0 + "," + 255 + ")";
 
         // essentially draw a filled circle using ctx.arc
         context.fillStyle = b.c;
         context.beginPath();
-        context.arc(b.x, b.y, b.r, startPoint, endPoint, true);
+        context.arc(b.x, b.y, b.life, startPoint, endPoint, true);
         context.fill();
         context.closePath();
     }
@@ -42,18 +42,17 @@ $(window).load(function() {
     var POS = {x: 0, y: 0, ms: 0};
     var LAST = POS;
 
-    var balls = [];
+    var fishes = [];
 
-    function ball(pos) {
-        balls.push(pos);
+    function releaseFish(fish) {
+        fishes.push(fish);
     }
 
     function drawAll() {
-        balls = balls.filter(function(b){
+        fishes = fishes.filter(function(b){
           draw(b);
-          // return true if keep, otherwise remove
-          b.r--;
-          return b.r > 0;
+          b.life--
+          return b.life > 0; // true to keep, otherwise dead
         });
     }
 
@@ -121,11 +120,12 @@ $(window).load(function() {
                     var dms = ms - POS.ms;
                     if (dms > 500) {
                         // change last one color and size
-                        POS.r = 100;
+                        POS.life = 100;
                         POS.c = "rgba(255,255,255,255)";
                     }
 		}
 		
+                // have hand
 		if (coords[0]) {
                     var x = (coords[0][0]+coords[0][2]/2) / video.videoWidth * canvas.clientWidth;
                     var y = (coords[0][1]+coords[0][3]/2) / video.videoWidth * canvas.clientWidth;
@@ -144,9 +144,7 @@ $(window).load(function() {
                     }
 
                     if (dist < 100 || dms == 0) {
-                        console.log("XY", x, y);
-
-                        ball(POS);
+                        releaseFish(POS);
                     } else {
                         POS = PREV;
                     }
