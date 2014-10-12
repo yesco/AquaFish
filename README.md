@@ -21,5 +21,6 @@ https://github.com/mtschirs/js-objectdetect it's a cool tool pure javascript tha
 > ```wget -rkp -l3 -np -nH --cut-dirs=1 http://web.psung.name/emacstips/```
 
 ## resources 
-[git it](
-http://qugstart.com/blog/ruby-and-rails/create-a-new-git-remote-repository-from-some-local-files-or-local-git-repository/) [how to create a repo](https://help.github.com/articles/create-a-repo/)
+- [git it](
+http://qugstart.com/blog/ruby-and-rails/create-a-new-git-remote-repository-from-some-local-files-or-local-git-repository/)
+- [how to create a repo](https://help.github.com/articles/create-a-repo/)
