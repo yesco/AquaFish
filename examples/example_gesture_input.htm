@@ -8,11 +8,7 @@
 #test {
   position: absolute; 
   top: 0px; 
-  //background-image: url(/images/bigblue-right.gif);
-  //background-repeat: no-repeat; 
   display: block;
-  //height: 200px; 
-  //width: 200px;
   z-index: 100;
 };
 </style>
@@ -37,11 +33,11 @@
 $(window).load(function() {
 
     function randGen() {
-        return Math.floor(Math.random() * 101) - 50;
+       return Math.floor(Math.random() * 101) - 50;
     }
 
-    function movement(fish, destination) {
-        console.log("movement", destination); //parseInt(fish.css("left"))-destination.x); 
+    function move(fish, destination) {
+       console.log("move", destination);
        fish.animate({left: destination.x, top: destination.y}, 500, "linear")
     }
 
@@ -66,8 +62,7 @@ $(window).load(function() {
                 console.log("fish1");
             }
 
-            console.log(destination);
-            movement(fish, destination)
+            move(fish, destination)
         }
     }
 
@@ -78,9 +73,8 @@ $(window).load(function() {
 
     canvas.onclick = function(e) {
       var fish = $("#test");
-      console.log("CLICK", e, fish);
       var pos = {x: e.x - fish.width()/2, y: e.y - fish.height()/2};
-      movement(fish, pos);
+      move(fish, pos);
     };
 
     var startPoint = (Math.PI/180)*0;
@@ -104,7 +98,7 @@ $(window).load(function() {
     var fishes = [];
 
     function releaseFish(fish) {
-        movement($("#test"), fish);
+        move($("#test"), fish);
         fishes.push(fish);
     }
 
@@ -231,7 +225,7 @@ $(window).load(function() {
 
 <img id="test" src="/images/bigblue-right.gif"/>
 
-<h1 style='text-align:center;font-size:60px;color:red;'>AquaFish</h1>
+<h1 style='text-align:center;font-size:60px;color:red;z-index:2'>AquaFish</h1>
 
 
 </body>
