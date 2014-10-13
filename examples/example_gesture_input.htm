@@ -60,9 +60,19 @@ $(window).load(function() {
 	direction: 'right',
     }
  
+    var timeForMove = 2000;
+
+    // stores the current setInterval move, this makes the fish only go random when
+    // it's not controlled, i.e. is idle
+    var moveIsPending;
+
     function move(fish, newPos, oldPos) {
-	fish.animate({left: newPos.xx || newPos.x, top: newPos.yy || newPos.y}, 2000, "linear")
+	fish.animate({left: newPos.xx || newPos.x, top: newPos.yy || newPos.y}, timeForMove, "linear")
 	fishPos = newPos;
+	// after timeForMove the fish is "idle"
+	moveIsPending = setTimeout(function() {
+	    moveIsPending = undefined;
+	}, timeForMove);
     }
 	
     // move fish randomly to a new pos
@@ -74,10 +84,9 @@ $(window).load(function() {
 		       y: oldPos.y + randGen(),
 		     };
 	
-	move(fish, newPos, oldPos);
+	console.log("GORANDOM");
+	initMoveAndMaybeTurn(fish, newPos, oldPos);
     }
-
-    var currentTimeout;
 
     // TODO: remove the .xx, .yy, but how, why still need the distinction?:
     function getX(pos) {
@@ -104,7 +113,6 @@ $(window).load(function() {
 	    }
 	}
 
-	//clearTimeout(currentTimeout); currentTimeout = undefined;
 	function swim() {
 	    console.log("GO: ", newPos.direction);
 	    move(fish, newPos, oldPos);
@@ -116,9 +124,9 @@ $(window).load(function() {
 	    swim();
 	} else {
 	    // wait for it to turn, about 1s
-	    currentTimeout = setTimeout(function() {
+	    moveIsPending = setTimeout(function() {
 		swim();
-		currentTimeout = undefined;
+		moveIsPending = undefined;
 	    }, 1000);
 	}
     }
@@ -159,10 +167,11 @@ $(window).load(function() {
     var fishes = [];
 
     // change direction of fish every 5s
-    if (false) // temporary disable
     setInterval(function changeDirection() {
-      var fish = $("#test");
-      randomFish(fish);
+	if (!moveIsPending) {
+	    var fish = $("#test");
+	    randomFish(fish);
+	}
     }, 5000);
 
     function drawAll() {
