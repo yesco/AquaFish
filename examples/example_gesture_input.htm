@@ -5,11 +5,28 @@
 <head>
 
 <style type="text/css">
+body {
+	background-image: url('/images/water.jpg');
+	}
+
 #test {
   position: absolute; 
+  width: 310px; 
+  height:180px;
   top: 0px; 
   display: block;
   z-index: 100;
+  background-repeat: no-repeat;
+};
+
+#test2 {
+  position: absolute;
+  width: 310px; 
+  height:180px;
+  top: 0px; 
+  display: block;
+  z-index: 100;
+  background-repeat: no-repeat;
 };
 </style>
 
@@ -36,35 +53,74 @@ $(window).load(function() {
        return Math.floor(Math.random() * 101) - 50;
     }
 
-    function move(fish, destination) {
-       fish.animate({left: destination.xx || destination.x, top: destination.yy || destination.y}, 500, "linear")
-    }
-
-    var destination = {
+    // TODO: remove, make this part of a fish object as each "fish"/div needs to have it's own fishPos
+    var fishPos = {
         x: 100,
         y: 200,
+	direction: 'right',
+    }
+ 
+    function move(fish, newPos, oldPos) {
+	fish.animate({left: newPos.xx || newPos.x, top: newPos.yy || newPos.y}, 2000, "linear")
+	fishPos = newPos;
+    }
+	
+    // move fish randomly to a new pos
+    function randomFish(fish) {
+        var fish = $("#test");
+        var oldPos = fishPos;
+
+	var newPos = { x: oldPos.x + randGen(),
+		       y: oldPos.y + randGen(),
+		     };
+	
+	move(fish, newPos, oldPos);
     }
 
- 
-    // TODO: make fish move randomly after released, every random few s?
-    function randomFish() {
-        var fish = $("#test");
-        for(var i=1; i<100; i++) {
-            var originalx = destination.x;
-            destination.x += randGen();
-            destination.y += randGen();
+    var currentTimeout;
 
-            if (originalx - destination.x>0) {
-                console.log(fish.css("left"));
-                fish.css("background-image", "url(/images/bigblue-right.gif)");
-                console.log("fish2");
-            } else {
-                fish.css("background-image", "url(/images/bigblue-left.gif)");
-                console.log("fish1");
-            }
+    // TODO: remove the .xx, .yy, but how, why still need the distinction?:
+    function getX(pos) {
+	return pos.xx || pos.x;
+    }
 
-            move(fish, destination)
-        }
+    function initMoveAndMaybeTurn(fish, newPos, oldPos) {
+	console.log("initMove", newPos, oldPos);
+	newPos.direction = oldPos.direction;
+
+        if (getX(newPos) > getX(oldPos)) {
+	    // make it flip, if wrong direction
+	    if (oldPos.direction == 'left') {
+		console.log("TURN: right");
+		fish.css("background-image", "url(/images/bigblue-left2right.gif)");
+		newPos.direction = 'right';
+	    }
+        } else if (getX(newPos) < getX(oldPos)) {
+	    if (oldPos.direction == 'right') {
+		// make it flip
+		console.log("TURN: left");
+		fish.css("background-image", "url(/images/bigblue-right2left.gif)");
+		newPos.direction = 'left';
+	    }
+	}
+
+	//clearTimeout(currentTimeout); currentTimeout = undefined;
+	function swim() {
+	    console.log("GO: ", newPos.direction);
+	    move(fish, newPos, oldPos);
+	    fish.css("background-image", "url(/images/bigblue-" + newPos.direction + ".gif)");
+	}
+
+	// if same direction no need to wait for it to turn, just swim
+	if (newPos.direction == oldPos.direction) {
+	    swim();
+	} else {
+	    // wait for it to turn, about 1s
+	    currentTimeout = setTimeout(function() {
+		swim();
+		currentTimeout = undefined;
+	    }, 1000);
+	}
     }
 
     var smoother = new Smoother([0.9995, 0.9995], [0, 0], 0);
@@ -74,10 +130,12 @@ $(window).load(function() {
 
     document.getElementsByTagName('body')[0].appendChild(canvas);
 
-    canvas.onclick = function(e) {
-      var fish = $("#test");
-      var pos = {x: e.x - fish.width()/2, y: e.y - fish.height()/2};
-      move(fish, pos);
+    canvas.onclick = function PlaceFishAtClickPos(e) {
+	console.log("CLICK");
+	var fish = $("#test");
+	var pos = { x: e.x - fish.width()/2,
+		    y: e.y - fish.height()/2 };
+	initMoveAndMaybeTurn(fish, pos, fishPos);
     };
 
     var startPoint = (Math.PI/180)*0;
@@ -100,8 +158,15 @@ $(window).load(function() {
 
     var fishes = [];
 
+    // change direction of fish every 5s
+    if (false) // temporary disable
+    setInterval(function changeDirection() {
+      var fish = $("#test");
+      randomFish(fish);
+    }, 5000);
+
     function drawAll() {
-        fishes = fishes.filter(function(fish){
+        fishes = fishes.filter(function drawAFish(fish){
           draw(fish);
           fish.life--
           return fish.life > 0; // true to keep, otherwise dead
@@ -137,6 +202,7 @@ $(window).load(function() {
         context.translate(canvas.clientWidth, 0);
         //context.translate(1000, 0);
         context.scale(-1, 1);
+	context.globalAlpha=0.3;
 
 	context.drawImage(video, 0, 0, canvas.clientWidth, canvas.clientHeight);
 
@@ -162,11 +228,12 @@ $(window).load(function() {
                 if (!coords[0]) {
                     var ms = Date.now();
                     var dms = ms - POS.ms;
-                    if (dms > 500) {
+                    if (dms > 500 && !POS.direction) {
                         // change last one color and size
                         POS.life = 100;
                         POS.c = "rgba(255,255,255,255)"; // white
-                        move($("#test"), POS);
+			console.log("release");
+                        initMoveAndMaybeTurn($("#test"), POS, fishPos);
 
                         // delay the creation of another fish, this stops persistent "flickering"
                         POS.ms = ms; 
@@ -224,10 +291,13 @@ $(window).load(function() {
 
 <body>
 
-<img id="test" src="/images/bigblue-right.gif"/>
+<div id="test">
+<h1 style='text-align:center;font-size:6px;color:blue;z-index:2'>AquaFish</h1>
+</div>
 
-<h1 style='text-align:center;font-size:60px;color:red;z-index:2'>AquaFish</h1>
-
+<div id="test2">
+<h1 style='text-align:center;font-size:6px;color:blue;z-index:2'>AquaFish2</h1>
+</div>
 
 </body>
 </html>
