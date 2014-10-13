@@ -149,14 +149,14 @@ $(window).load(function() {
     var startPoint = (Math.PI/180)*0;
     var endPoint = (Math.PI/180)*360;
 
-    function draw(fish) {
-        fish.life = fish.life || 30;
-        fish.c = fish.c || "rgba(" + 0 + "," + 0 + "," + 0 + "," + 255 + ")";
+    function drawBlob(pos) {
+        pos.life = pos.life || 30;
+        pos.c = pos.c || "rgba(" + 0 + "," + 0 + "," + 0 + "," + 255 + ")";
 
         // essentially draw a filled circle using ctx.arc
-        context.fillStyle = fish.c;
+        context.fillStyle = pos.c;
         context.beginPath();
-        context.arc(fish.x, fish.y, fish.life, startPoint, endPoint, true);
+        context.arc(pos.x, pos.y, pos.life, startPoint, endPoint, true);
         context.fill();
         context.closePath();
     }
@@ -164,7 +164,7 @@ $(window).load(function() {
     var POS = {x: 0, y: 0, ms: 0};
     var LAST = POS;
 
-    var fishes = [];
+    var blobs = [];
 
     // change direction of fish every 5s
     setInterval(function changeDirection() {
@@ -174,11 +174,11 @@ $(window).load(function() {
 	}
     }, 5000);
 
-    function drawAll() {
-        fishes = fishes.filter(function drawAFish(fish){
-          draw(fish);
-          fish.life--
-          return fish.life > 0; // true to keep, otherwise dead
+    function drawTrail() {
+        blobs = blobs.filter(function drawOne(pos){
+            drawBlob(pos);
+            pos.life--
+          return pos.life > 0; // true to keep, otherwise dead
         });
     }
 
@@ -272,7 +272,7 @@ $(window).load(function() {
                     }
 
                     if (dist < 100 || dms == 0) {
-                        fishes.push(POS);
+                        blobs.push(POS);
                     } else {
                         POS = PREV;
                     }
@@ -289,7 +289,7 @@ $(window).load(function() {
 		    context.stroke();
 		}
 		
-                drawAll();
+                drawTrail();
 		
 	    });
 	}
